@@ -95,7 +95,8 @@ router.post('/register', (req, res, next) => {
         username,
         password,
         token,
-        info
+        info,
+        time: new Date().getTime()
       })
       user.save((err, doc) => {
         res.json({
@@ -126,6 +127,72 @@ router.post('/logout', (req, res, next) => {
   res.json({
     code: 20000,
     data: 'success'
+  })
+})
+
+router.post('/userList', (req, res, next) => {
+  const token = req.body.token
+  User.findOne({ token }, (err, user) => {
+    if (err) console.log(err)
+    else {
+      const roles = user.toObject().info.roles
+      if (roles.includes('admin') || roles.includes('super-admin')) {
+        User.find({}, (err, users)=>{
+          if (err) console.log(err)
+          else {
+            if (!roles.includes('super-admin')) {
+              users = users.map(item => {
+                item.password = '*******'
+                return item
+              })
+            }
+            res.json({
+              code: 20000,
+              message: users
+            })
+          }
+        })
+      } else {
+        res.json({
+          code: 444,
+          message: '暂无权限访问该页面'
+        })
+      }
+    }
+  })
+})
+
+router.post('/changeRoles', (req, res, next) => {
+  const username = req.body.username
+  const roles = req.body.roles
+  User.findOne({ username }, (err, user) => {
+    if(err) console.log(err)
+    else {
+      user = user.toObject()
+      user.info.roles = roles
+      User.update({ username }, user, (err, doc) => {
+        if(err) console.log(err)
+        else {
+          res.json({
+            code: 20000,
+            message: doc
+          })
+        }
+      })
+    }
+  })
+})
+
+router.post('/deleteUser', (req, res, next) => {
+  const username = req.body.username
+  User.findOneAndDelete({ username }, (err, doc) => {
+    if (err) console.log(err)
+    else {
+      res.json({
+        code: 20000,
+        message: doc
+      })
+    }
   })
 })
 
