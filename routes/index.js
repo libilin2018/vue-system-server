@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var mongoose = require("mongoose");
+var qiniu = require('qiniu')
 
 // var User = require("../models/users");
 
@@ -22,5 +23,21 @@ mongoose.connection.on("disconnected", function() {
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
+
+router.get('/token', (req, res, next) => {
+    const accessKey = 'lWmw26YUDMtgxsJnirmQ6mRVQsaJnFT5fsKQscuh'
+    const secretKey = 'OhjpVwAobJsaUv9z_OhtXSbwbQgQbybA6R9ZhA60'
+    const mac = new qiniu.auth.digest.Mac(accessKey, secretKey)
+    const options = {
+        scope: 'vue-visual-system',
+        expires: 7200
+    }
+    const putPolicy = new qiniu.rs.PutPolicy(options)
+    const uploadToken = putPolicy.uploadToken(mac)
+    res.json({
+        code: 20000,
+        message: uploadToken
+    })
+})
 
 module.exports = router;

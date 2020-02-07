@@ -31,7 +31,8 @@ const info = {
   "avatar" : "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
   "roles" : [ 
       "user"
-  ]
+  ],
+  "time": new Date().getTime()
 }
 
 function getId() {
@@ -43,8 +44,10 @@ function getId() {
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-  res.json({
-    'data': '6'
+  User.findOne({}, (err, user) => {
+    res.json({
+      message: user
+    })
   })
 });
 
@@ -191,6 +194,19 @@ router.post('/deleteUser', (req, res, next) => {
       res.json({
         code: 20000,
         message: doc
+      })
+    }
+  })
+})
+
+router.post('/changeInfo', (req, res, next) => {
+  const username = req.body.username
+  const info = req.body.info
+  User.findOneAndUpdate({ username },  {'$set': {'info': info}}, (err, doc) => {
+    if (err) console.log(err)
+    else {
+      res.json({
+        code: 20000
       })
     }
   })
