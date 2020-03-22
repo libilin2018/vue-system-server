@@ -2,6 +2,10 @@ var express = require('express');
 var router = express.Router();
 var mongoose = require("mongoose");
 var qiniu = require('qiniu')
+var formidable = require('formidable')
+
+var path = require('path')
+var fs = require('fs')
 
 // var User = require("../models/users");
 
@@ -23,6 +27,43 @@ mongoose.connection.on("disconnected", function() {
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
+
+router.post("/upload", (req, res, next) => {
+    const form = new formidable.IncomingForm()
+    const fileDir = '/upload'
+    form.uploadDir = __dirname + fileDir
+    form.keepExtensions = true
+    form.parse(req, (err, fields, files) => {
+        const extName = path.extname(files.file.name)
+        const avatarName = '/' + new Date().getTime() + extName
+        const newPath = form.uploadDir + avatarName
+        console.log(files.file.path, newPath)
+        fs.renameSync(files.file.path, newPath)
+        res.json({
+            code: 20000,
+            message: '上传图片成功',
+            data: {
+                url: fileDir + avatarName
+            }
+        })
+    })
+});
+
+router.get('/picture', (req, res, next) => {
+    const path = req.query.path
+    console.log(path)
+    const file_path = __dirname + '/' + path
+    fs.readFile(file_path, 'binary', (err, data) => {
+        if (err) console.log(err)
+        else {
+            res.writeHead(200, {
+                'Content-Type': 'image/jpeg'
+            })
+            res.write(data, 'binary')
+            res.end()
+        }
+    })
+})
 
 router.get('/token', (req, res, next) => {
     const accessKey = 'lWmw26YUDMtgxsJnirmQ6mRVQsaJnFT5fsKQscuh'

@@ -26,14 +26,6 @@ var User = require("../models/users");
 //   }
 // }
 
-const info = {
-  "introduction" : "这个人很赖，什么也没留下",
-  "avatar" : "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
-  "roles" : [ 
-      "user"
-  ],
-  "time": new Date().getTime()
-}
 
 function getId() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -85,6 +77,14 @@ router.post('/login', function(req, res, next) {
 router.post('/register', (req, res, next) => {
   const username = req.body.username
   const password = req.body.password
+  const info = {
+    "introduction" : "这个人很赖，什么也没留下",
+    "avatar" : "https://cube.elemecdn.com/9/c2/f0ee8a3c7c9638a54940382568c9dpng.png",
+    "roles" : [ 
+        "user"
+    ],
+    "time": new Date().getTime()
+  }
   User.findOne({ username }, (err, doc) => {
     if (doc) {
       res.json({
